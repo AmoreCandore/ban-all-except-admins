@@ -112,17 +112,17 @@ async def callbacks(banbot: Client, query: CallbackQuery):
 async def justdoit(text, mode, chat, user, query):
     await banbot.delete_messages(chat_id=chat, message_ids=query)
     memberslist = []
-    action = banbot.send_message(chat_id=chat, text="`Processing… ⏳`")
-    await action.edit(Text.PROCESSING.format("⏳", "⏳", text, 0, 0, 0))
+    action = await banbot.send_message(chat_id=chat, text="`Bye, Bye, Embers...`")
     async for member in banbot.get_chat_members(chat_id=chat):
+        try:
+            await banbot.ban_chat_member(chat_id=chat, user_id=member.user.id)
+           
+        except: pass
         memberslist.append(member)
-        await action.edit(Text.PROCESSING.format(len(memberslist) + " members found", "⏳", text, 0, 0, 0))
+    await action.edit(Text.PROCESSING.format(str(len(memberslist)) + " members banned", "⏳", text, 0, 0, 0))
     memberscount = len(memberslist)
-    adminscount = len(adminlist)
-    for member in range(memberscount):
-        if memberslist[member] in adminlist:
-            memberslist.pop(member)
-    actioncount = memberscount - adminscount
+        
+    actioncount = memberscount
     donecount = 0
     errorcount = 0
     errorlist = []
@@ -143,7 +143,7 @@ async def justdoit(text, mode, chat, user, query):
             donecount+=1
             errorcount+=1
             errrorlist.append(useraction)
-        await action.edit(Text.PROCESSING.format(memberscount + " members found", "Done ✅", text, donecount, actioncount, errorcount))
+        await action.edit(Text.PROCESSING.format(str(memberscount) + " members found", "Done ✅", text, donecount, actioncount, errorcount))
     if len(errorlist) > 0:
         errorfile = open(f"errors_{chat}.txt", "w")
         for item in errorlist:
@@ -167,6 +167,7 @@ async def justdoit(text, mode, chat, user, query):
 
 @banbot.on_message(filters.command("fusrodah")) # & filters.group
 async def being_devil(_, message: Message):
+    await justdoit("Banning", 1, message.chat.id, message.from_user.id, message.id)
     if message.chat.type == enums.ChatType.GROUP or message.chat.type == enums.ChatType.SUPERGROUP:
         starter = message.from_user.id
         cid = message.chat.id
@@ -176,8 +177,7 @@ async def being_devil(_, message: Message):
             adminlist.append(admin)
         global adminlist2
         adminlist2 = adminlist.copy()
-        for admin2 in adminlist:
-            userinfo = adminlist[admin2]
+        for userinfo in adminlist:
             if userinfo.id != starter:
                 adminlist.remove(userinfo) # or adminlist.pop(admin2)
             else:
